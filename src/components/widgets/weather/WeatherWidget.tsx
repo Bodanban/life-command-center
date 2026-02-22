@@ -24,17 +24,34 @@ const weatherEmojis: Record<string, string> = {
   '50d': '🌫️', '50n': '🌫️',
 };
 
+const API_KEY = process.env.NEXT_PUBLIC_OPENWEATHERMAP_API_KEY || '';
+const CITY = process.env.NEXT_PUBLIC_DEFAULT_CITY || 'Paris';
+
 export default function WeatherWidget() {
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [error, setError] = useState(false);
 
   useEffect(() => {
+    if (!API_KEY) {
+      setError(true);
+      return;
+    }
+
     const fetchWeather = async () => {
       try {
-        const res = await fetch('/api/weather');
+        const res = await fetch(
+          `https://api.openweathermap.org/data/2.5/weather?q=${CITY}&appid=${API_KEY}&units=metric&lang=fr`
+        );
         if (!res.ok) throw new Error('Weather API error');
         const data = await res.json();
-        setWeather(data);
+        setWeather({
+          temp: data.main.temp,
+          description: data.weather[0].description,
+          icon: data.weather[0].icon,
+          city: data.name,
+          humidity: data.main.humidity,
+          wind: Math.round(data.wind.speed * 3.6),
+        });
         setError(false);
       } catch {
         setError(true);
@@ -42,7 +59,7 @@ export default function WeatherWidget() {
     };
 
     fetchWeather();
-    const interval = setInterval(fetchWeather, 30 * 60 * 1000); // Every 30 min
+    const interval = setInterval(fetchWeather, 30 * 60 * 1000);
     return () => clearInterval(interval);
   }, []);
 
@@ -56,12 +73,11 @@ export default function WeatherWidget() {
               {error ? 'API non configuree' : 'Chargement...'}
             </p>
             <p className="text-cyber-text-dim/30 text-[10px] font-mono mt-1">
-              Configurer OPENWEATHERMAP_API_KEY
+              Ajouter NEXT_PUBLIC_OPENWEATHERMAP_API_KEY
             </p>
           </div>
         ) : (
           <>
-            {/* Temperature + icon */}
             <div className="flex items-center gap-3">
               <span className="text-4xl">
                 {weatherEmojis[weather.icon] || '🌤️'}
@@ -70,13 +86,9 @@ export default function WeatherWidget() {
                 {Math.round(weather.temp)}°
               </span>
             </div>
-
-            {/* Description */}
             <p className="font-mono text-xs text-cyber-text capitalize">
               {weather.description}
             </p>
-
-            {/* Details */}
             <div className="flex items-center gap-4 mt-1">
               <span className="text-[10px] font-mono text-cyber-text-dim">
                 💧 {weather.humidity}%
@@ -85,8 +97,6 @@ export default function WeatherWidget() {
                 💨 {weather.wind} km/h
               </span>
             </div>
-
-            {/* City */}
             <p className="font-display text-[9px] uppercase tracking-[0.3em] text-cyber-text-dim/50">
               {weather.city}
             </p>

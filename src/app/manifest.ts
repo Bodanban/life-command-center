@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: 'Life Command Center',
     short_name: 'CMD Center',
     description: 'Ton centre de controle cyberpunk personnel',
-    start_url: '/',
+    start_url: '/life-command-center/',
     display: 'standalone',
     orientation: 'landscape',
     background_color: '#0a0a0f',
