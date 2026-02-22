@@ -5,8 +5,8 @@ export const metadata: Metadata = {
   title: 'Life Command Center',
   description: 'Your personal cyberpunk command dashboard',
   icons: {
-    icon: '/icons/icon-192x192.png',
-    apple: '/icons/icon-192x192.png',
+    icon: '/life-command-center/icons/icon.svg',
+    apple: '/life-command-center/icons/icon.svg',
   },
 };
 
