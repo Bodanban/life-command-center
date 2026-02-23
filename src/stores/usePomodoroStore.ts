@@ -110,12 +110,29 @@ export const usePomodoroStore = create<PomodoroState>()(
         if (remaining <= 0) {
           // Session complete — auto-skip
           state.skip();
-          // Play sound
+          // Play cyberpunk notification sound via Web Audio API
           try {
-            const audio = new Audio('/sounds/pomodoro-end.mp3');
-            audio.volume = 0.5;
-            audio.play().catch(() => {});
+            const ctx = new AudioContext();
+            const playTone = (freq: number, startTime: number, duration: number) => {
+              const osc = ctx.createOscillator();
+              const gain = ctx.createGain();
+              osc.connect(gain);
+              gain.connect(ctx.destination);
+              osc.type = 'sine';
+              osc.frequency.setValueAtTime(freq, startTime);
+              gain.gain.setValueAtTime(0, startTime);
+              gain.gain.linearRampToValueAtTime(0.3, startTime + 0.02);
+              gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+              osc.start(startTime);
+              osc.stop(startTime + duration);
+            };
+            const now = ctx.currentTime;
+            playTone(880, now, 0.15);
+            playTone(1100, now + 0.18, 0.15);
+            playTone(1320, now + 0.36, 0.3);
           } catch {}
+          // Vibrate on mobile
+          try { navigator.vibrate?.([200, 100, 200]); } catch {}
         }
       },
     }),

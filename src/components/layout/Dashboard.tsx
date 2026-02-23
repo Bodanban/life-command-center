@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import ClockWidget from '@/components/widgets/clock/ClockWidget';
 import DailyObjectivesWidget from '@/components/widgets/daily-objectives/DailyObjectivesWidget';
 import PomodoroWidget from '@/components/widgets/pomodoro/PomodoroWidget';
@@ -12,6 +13,32 @@ import BurnInPrevention from '@/components/effects/BurnInPrevention';
 import ScreenDimmer from '@/components/effects/ScreenDimmer';
 
 export default function Dashboard() {
+  // Wake Lock: keep screen on (for always-on tablet display)
+  useEffect(() => {
+    let wakeLock: WakeLockSentinel | null = null;
+
+    const requestWakeLock = async () => {
+      try {
+        if ('wakeLock' in navigator) {
+          wakeLock = await navigator.wakeLock.request('screen');
+        }
+      } catch {}
+    };
+
+    requestWakeLock();
+
+    // Re-acquire on visibility change (when user returns to app)
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') requestWakeLock();
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility);
+      wakeLock?.release().catch(() => {});
+    };
+  }, []);
+
   return (
     <>
       <ScreenDimmer />

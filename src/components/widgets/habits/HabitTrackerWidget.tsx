@@ -203,8 +203,10 @@ export default function HabitTrackerWidget() {
 
                   {/* Delete button */}
                   <button
-                    onClick={() => removeHabit(habit.id)}
-                    className="opacity-0 group-hover:opacity-100 text-cyber-red/50 hover:text-cyber-red text-[8px] transition-opacity ml-0.5"
+                    onClick={() => {
+                      if (confirm(`Supprimer l'habitude "${habit.name}" ?`)) removeHabit(habit.id);
+                    }}
+                    className="opacity-0 group-hover:opacity-100 active:opacity-100 text-cyber-red/50 hover:text-cyber-red text-[8px] transition-opacity ml-0.5 min-w-[28px] min-h-[28px] flex items-center justify-center"
                   >
                     ✕
                   </button>

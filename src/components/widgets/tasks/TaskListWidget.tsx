@@ -111,8 +111,10 @@ export default function TaskListWidget() {
                   {priorityConfig[task.priority].label}
                 </NeonBadge>
                 <button
-                  onClick={() => deleteTask(task.id)}
-                  className="opacity-0 group-hover:opacity-100 text-cyber-red/60 hover:text-cyber-red text-xs transition-opacity flex-shrink-0"
+                  onClick={() => {
+                    if (confirm('Supprimer cette tâche ?')) deleteTask(task.id);
+                  }}
+                  className="opacity-0 group-hover:opacity-100 active:opacity-100 text-cyber-red/60 hover:text-cyber-red text-xs transition-opacity flex-shrink-0 min-w-[32px] min-h-[32px] flex items-center justify-center"
                 >
                   ✕
                 </button>
