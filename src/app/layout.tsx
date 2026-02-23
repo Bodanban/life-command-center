@@ -25,6 +25,21 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr" className="dark">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/life-command-center/sw.js', {
+                    scope: '/life-command-center/'
+                  });
+                });
+              }
+            `,
+          }}
+        />
+      </head>
       <body className="min-h-screen overflow-hidden bg-cyber-bg-deep">
         {children}
       </body>
