@@ -37,6 +37,9 @@ const DEFAULT_HABITS: { name: string; color: string; icon: string }[] = [
   { name: 'Méditation', color: '#b400ff', icon: '🧘' },
   { name: '4H Work', color: '#00d4ff', icon: '💻' },
   { name: 'Sport', color: '#00ff88', icon: '💪' },
+  { name: '50 Pompes', color: '#00ff88', icon: '🏋️' },
+  { name: '50 Squats', color: '#00d4ff', icon: '🦵' },
+  { name: '50 Crunchs', color: '#ff6ec7', icon: '🔥' },
   { name: 'Lecture 15 Pages', color: '#ff6ec7', icon: '📖' },
   { name: 'Tracking', color: '#00d4ff', icon: '📊' },
   { name: 'Visualisation', color: '#b400ff', icon: '🎯' },
@@ -150,24 +153,44 @@ export const useHabitStore = create<HabitState>()(
       },
 
       initDefaultHabits: () => {
-        if (get()._initialized) return;
-        if (get().habits.length > 0) {
-          set({ _initialized: true });
+        const existing = get().habits;
+        if (existing.length === 0) {
+          // First time: create all defaults
+          const habits: Habit[] = DEFAULT_HABITS.map((h, i) => ({
+            id: `default_${i}_${Date.now().toString(36)}`,
+            user_id: 'local',
+            name: h.name,
+            color: h.color,
+            icon: h.icon,
+            is_active: true,
+            current_streak: 0,
+            longest_streak: 0,
+            sort_order: i,
+            created_at: new Date().toISOString(),
+          }));
+          set({ habits, _initialized: true });
           return;
         }
-        const habits: Habit[] = DEFAULT_HABITS.map((h, i) => ({
-          id: `default_${i}_${Date.now().toString(36)}`,
-          user_id: 'local',
-          name: h.name,
-          color: h.color,
-          icon: h.icon,
-          is_active: true,
-          current_streak: 0,
-          longest_streak: 0,
-          sort_order: i,
-          created_at: new Date().toISOString(),
-        }));
-        set({ habits, _initialized: true });
+        // Add any missing default habits
+        const existingNames = new Set(existing.map((h) => h.name));
+        const missing = DEFAULT_HABITS.filter((h) => !existingNames.has(h.name));
+        if (missing.length > 0) {
+          const newHabits: Habit[] = missing.map((h, i) => ({
+            id: `default_${existing.length + i}_${Date.now().toString(36)}`,
+            user_id: 'local',
+            name: h.name,
+            color: h.color,
+            icon: h.icon,
+            is_active: true,
+            current_streak: 0,
+            longest_streak: 0,
+            sort_order: existing.length + i,
+            created_at: new Date().toISOString(),
+          }));
+          set({ habits: [...existing, ...newHabits], _initialized: true });
+        } else {
+          set({ _initialized: true });
+        }
       },
 
       getTodayCompletionRate: () => {

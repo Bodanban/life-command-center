@@ -27,56 +27,84 @@ export default function ClockWidget() {
   const currentHour = time.getHours() + time.getMinutes() / 60;
   const dayProgress = Math.min(100, Math.max(0, ((currentHour - 5) / (23 - 5)) * 100));
 
+  // Color interpolation based on progress
+  const progressColor = dayProgress < 50 ? '#00d4ff' : '#b400ff';
+
   return (
     <WidgetPanel accent="blue" className="h-full">
-      <div className="flex flex-col items-center justify-center h-full gap-2">
-        {/* Time */}
-        <div className="flex items-baseline gap-1">
-          <span className="font-display text-4xl font-bold text-cyber-blue text-glow-blue">
+      <div className="flex flex-col items-center justify-center h-full gap-1">
+        {/* Time - bigger, bolder */}
+        <div className="flex items-baseline gap-0.5 relative">
+          {/* Ambient glow behind time */}
+          <div
+            className="absolute inset-0 -inset-x-8 -inset-y-4 rounded-full blur-2xl opacity-20"
+            style={{ background: `radial-gradient(circle, #00d4ff, transparent)` }}
+          />
+          <span
+            className="font-display text-5xl font-black relative"
+            style={{
+              color: '#00d4ff',
+              textShadow: '0 0 10px #00d4ff, 0 0 30px rgba(0,212,255,0.4), 0 0 60px rgba(0,212,255,0.15)',
+            }}
+          >
             {hours}
           </span>
-          <span className="font-display text-4xl font-bold text-cyber-blue animate-pulse-neon">
+          <span
+            className="font-display text-5xl font-black animate-pulse-neon relative"
+            style={{
+              color: '#00d4ff',
+              textShadow: '0 0 10px #00d4ff, 0 0 30px rgba(0,212,255,0.4)',
+            }}
+          >
             :
           </span>
-          <span className="font-display text-4xl font-bold text-cyber-blue text-glow-blue">
+          <span
+            className="font-display text-5xl font-black relative"
+            style={{
+              color: '#00d4ff',
+              textShadow: '0 0 10px #00d4ff, 0 0 30px rgba(0,212,255,0.4), 0 0 60px rgba(0,212,255,0.15)',
+            }}
+          >
             {minutes}
           </span>
-          <span className="font-display text-lg font-bold text-cyber-blue/60 ml-1">
+          <span className="font-display text-xl font-bold text-cyber-blue/50 ml-1 relative">
             {seconds}
           </span>
         </div>
 
         {/* Date */}
         <div className="text-center">
-          <p className="font-mono text-xs text-cyber-text-dim tracking-[0.3em]">
+          <p className="font-mono text-[11px] text-cyber-text-dim tracking-[0.3em]">
             {dayName} // {day} {month} {year}
           </p>
         </div>
 
         {/* Day progress bar */}
-        <div className="w-full px-1 mt-1">
+        <div className="w-full px-1 mt-2">
           <div className="flex items-center justify-between mb-1">
             <span className="font-mono text-[7px] text-cyber-text-dim/40">5h</span>
-            <span className="font-mono text-[7px] text-cyber-text-dim/40">{Math.round(dayProgress)}%</span>
+            <span className="font-mono text-[8px] font-bold" style={{ color: progressColor, textShadow: `0 0 4px ${progressColor}60` }}>
+              {Math.round(dayProgress)}%
+            </span>
             <span className="font-mono text-[7px] text-cyber-text-dim/40">23h</span>
           </div>
-          <div className="relative h-[3px] bg-white/[0.06] rounded-full overflow-visible">
+          <div className="relative h-[4px] bg-white/[0.06] rounded-full overflow-visible">
             <div
               className="absolute inset-y-0 left-0 rounded-full"
               style={{
                 width: `${dayProgress}%`,
                 background: 'linear-gradient(90deg, #00d4ff, #b400ff)',
-                boxShadow: '0 0 6px rgba(0, 212, 255, 0.3)',
+                boxShadow: '0 0 8px rgba(0, 212, 255, 0.4), 0 0 16px rgba(180, 0, 255, 0.2)',
               }}
             />
             {/* Glowing dot at current position */}
             <div
-              className="absolute top-1/2 -translate-y-1/2 w-[7px] h-[7px] rounded-full"
+              className="absolute top-1/2 w-[9px] h-[9px] rounded-full animate-pulse-neon"
               style={{
                 left: `${dayProgress}%`,
                 transform: `translateX(-50%) translateY(-50%)`,
-                background: dayProgress < 50 ? '#00d4ff' : '#b400ff',
-                boxShadow: `0 0 8px ${dayProgress < 50 ? '#00d4ff' : '#b400ff'}, 0 0 16px ${dayProgress < 50 ? '#00d4ff40' : '#b400ff40'}`,
+                background: progressColor,
+                boxShadow: `0 0 8px ${progressColor}, 0 0 20px ${progressColor}60`,
               }}
             />
           </div>

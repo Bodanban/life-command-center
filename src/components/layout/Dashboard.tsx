@@ -45,9 +45,11 @@ export default function Dashboard() {
   return (
     <>
       <ScreenDimmer />
+      <div className="ambient-glow" />
+      <div className="scan-line" />
       {isSettingsOpen && <SettingsPanel />}
       <BurnInPrevention>
-        <div className="h-screen w-screen p-2 overflow-hidden">
+        <div className="h-screen w-screen p-2 overflow-hidden relative z-[1]">
           {/* Settings gear button */}
           <button
             onClick={openSettings}
@@ -69,7 +71,7 @@ export default function Dashboard() {
             |                     |  Habit Tracker   |  Routine Soir     |
             +---------------------+------------------+-------------------+
           */}
-          <div className="grid grid-cols-3 grid-rows-4 gap-2 h-full [&>div]:min-h-0">
+          <div className="grid grid-cols-3 grid-rows-4 gap-2 h-full [&>div]:min-h-0 widget-stagger">
             {/* Row 1-2, Col 1: Daily Objectives */}
             <div className="row-span-2 h-full">
               <DailyObjectivesWidget />

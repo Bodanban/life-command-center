@@ -61,7 +61,7 @@ export default function WidgetPanel({
       <div
         onClick={handleDoubleTap}
         className={cn(
-          'glass-panel flex flex-col animate-float touch-manipulation',
+          'glass-panel hud-corners flex flex-col animate-float touch-manipulation',
           accentClasses[accent],
           className
         )}

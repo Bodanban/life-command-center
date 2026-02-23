@@ -175,6 +175,93 @@
   animation: expand-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* ===== AMBIENT GLOW ===== */
+@keyframes ambient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Subtle ambient glow behind the entire grid */
+.ambient-glow {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(ellipse 600px 400px at 20% 20%, rgba(0, 212, 255, 0.04), transparent),
+              radial-gradient(ellipse 500px 300px at 80% 80%, rgba(180, 0, 255, 0.04), transparent),
+              radial-gradient(ellipse 400px 400px at 50% 50%, rgba(0, 255, 136, 0.02), transparent);
+  animation: ambient-shift 20s ease-in-out infinite;
+  background-size: 200% 200%;
+}
+
+/* ===== STAGGERED WIDGET ENTRY ===== */
+@keyframes widget-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.97);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+.widget-stagger > div:nth-child(1) { animation: widget-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both; }
+.widget-stagger > div:nth-child(2) { animation: widget-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.12s both; }
+.widget-stagger > div:nth-child(3) { animation: widget-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.19s both; }
+.widget-stagger > div:nth-child(4) { animation: widget-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.26s both; }
+.widget-stagger > div:nth-child(5) { animation: widget-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.33s both; }
+.widget-stagger > div:nth-child(6) { animation: widget-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.40s both; }
+.widget-stagger > div:nth-child(7) { animation: widget-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.47s both; }
+.widget-stagger > div:nth-child(8) { animation: widget-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.54s both; }
+
+/* ===== ENHANCED GLASS PANEL ===== */
+.glass-panel:hover {
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+/* ===== SCAN LINE SWEEP (subtle) ===== */
+@keyframes scan-sweep {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+.scan-line {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.15), transparent);
+  pointer-events: none;
+  z-index: 9998;
+  animation: scan-sweep 6s linear infinite;
+  opacity: 0.5;
+}
+
+/* ===== CORNER ACCENTS (HUD-style) ===== */
+.hud-corners::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    linear-gradient(to right, rgba(0, 212, 255, 0.4) 0%, transparent 8%) top left,
+    linear-gradient(to bottom, rgba(0, 212, 255, 0.4) 0%, transparent 12%) top left,
+    linear-gradient(to left, rgba(180, 0, 255, 0.3) 0%, transparent 8%) bottom right,
+    linear-gradient(to top, rgba(180, 0, 255, 0.3) 0%, transparent 12%) bottom right;
+  background-repeat: no-repeat;
+  background-size: 20px 2px, 2px 16px, 20px 2px, 2px 16px;
+}
+
 /* ===== UTILITIES ===== */
 @layer utilities {
   .no-scrollbar::-webkit-scrollbar {

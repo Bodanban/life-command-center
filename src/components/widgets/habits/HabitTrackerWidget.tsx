@@ -45,12 +45,17 @@ export default function HabitTrackerWidget() {
     if (e.key === 'Escape') setShowAdd(false);
   };
 
-  // Generate last 7 days for mini grid
-  const last7Days = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() - (6 - i));
-    return d.toISOString().split('T')[0];
-  });
+  // Generate current week (Monday to Sunday)
+  const last7Days = (() => {
+    const now = new Date();
+    const jsDay = now.getDay(); // 0=Dim, 1=Lun, ...
+    const mondayOffset = jsDay === 0 ? -6 : 1 - jsDay;
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date();
+      d.setDate(now.getDate() + mondayOffset + i);
+      return d.toISOString().split('T')[0];
+    });
+  })();
 
   const dayLabels = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
   const completionRate = getTodayCompletionRate();
@@ -107,11 +112,9 @@ export default function HabitTrackerWidget() {
           </div>
         </div>
 
-        {/* Day headers */}
+        {/* Day headers (Mon-Sun) */}
         <div className="flex items-center gap-0.5 pl-[90px]">
-          {last7Days.map((date) => {
-            const d = new Date(date + 'T00:00:00');
-            const dayIndex = d.getDay();
+          {last7Days.map((date, i) => {
             const isToday = date === today;
             return (
               <div
@@ -120,7 +123,7 @@ export default function HabitTrackerWidget() {
                   isToday ? 'text-cyber-purple font-bold' : 'text-cyber-text-dim/40'
                 }`}
               >
-                {dayLabels[dayIndex === 0 ? 6 : dayIndex - 1]}
+                {dayLabels[i]}
               </div>
             );
           })}
