@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils/cn';
 type AccentColor = 'blue' | 'green' | 'purple' | 'red' | 'yellow';
 
 interface WidgetPanelProps {
-  children: React.ReactNode;
+  children: React.ReactNode | ((isExpanded: boolean) => React.ReactNode);
   accent?: AccentColor;
   className?: string;
   title?: string;
@@ -77,7 +77,9 @@ export default function WidgetPanel({
             )}
           </div>
         )}
-        <div className="flex-1 overflow-hidden p-3">{children}</div>
+        <div className="flex-1 overflow-hidden p-3">
+          {typeof children === 'function' ? children(false) : children}
+        </div>
       </div>
 
       {/* Expanded fullscreen overlay */}
@@ -111,7 +113,9 @@ export default function WidgetPanel({
               </button>
             </div>
             {/* Expanded content - more padding, scrollable */}
-            <div className="flex-1 overflow-auto p-5">{children}</div>
+            <div className="flex-1 overflow-auto p-5">
+              {typeof children === 'function' ? children(true) : children}
+            </div>
           </div>
         </div>
       )}

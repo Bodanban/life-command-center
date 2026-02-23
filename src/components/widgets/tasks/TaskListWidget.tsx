@@ -1,11 +1,29 @@
 'use client';
 
 import { useState, useRef } from 'react';
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import WidgetPanel from '@/components/layout/WidgetPanel';
 import NeonCheckbox from '@/components/ui/NeonCheckbox';
 import NeonInput from '@/components/ui/NeonInput';
 import NeonBadge from '@/components/ui/NeonBadge';
 import { useTaskStore } from '@/stores/useTaskStore';
+import { usePomodoroStore } from '@/stores/usePomodoroStore';
 import type { Task } from '@/types/app';
 
 const priorityConfig = {
@@ -14,22 +32,106 @@ const priorityConfig = {
   low: { label: 'FAIBLE', variant: 'blue' as const },
 };
 
+function SortableTaskItem({
+  task,
+  toggleComplete,
+  deleteTask,
+  pomodoroCount,
+}: {
+  task: Task;
+  toggleComplete: (id: string) => void;
+  deleteTask: (id: string) => void;
+  pomodoroCount: number;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: task.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.4 : undefined,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`group flex items-center gap-1.5 py-1.5 px-2 rounded-lg transition-colors ${
+        task.is_completed
+          ? 'opacity-40 hover:opacity-60'
+          : 'hover:bg-white/[0.03]'
+      }`}
+    >
+      {/* Drag handle */}
+      <button
+        {...attributes}
+        {...listeners}
+        className="flex-shrink-0 w-6 h-6 flex items-center justify-center text-cyber-text-dim/30 hover:text-cyber-text-dim/60 cursor-grab active:cursor-grabbing touch-manipulation"
+      >
+        <span className="text-[10px] leading-none">⠇</span>
+      </button>
+
+      <NeonCheckbox
+        checked={task.is_completed}
+        onChange={() => toggleComplete(task.id)}
+        label={task.title}
+        className="flex-1 min-w-0"
+      />
+
+      {pomodoroCount > 0 && (
+        <span className="flex-shrink-0 font-mono text-[9px] text-cyber-yellow/70 bg-cyber-yellow/10 px-1.5 py-0.5 rounded">
+          ⏱{pomodoroCount}
+        </span>
+      )}
+
+      <NeonBadge variant={priorityConfig[task.priority].variant}>
+        {priorityConfig[task.priority].label}
+      </NeonBadge>
+
+      <button
+        onClick={() => {
+          if (confirm('Supprimer cette tâche ?')) deleteTask(task.id);
+        }}
+        className="opacity-0 group-hover:opacity-100 active:opacity-100 text-cyber-red/60 hover:text-cyber-red text-xs transition-opacity flex-shrink-0 min-w-[32px] min-h-[32px] flex items-center justify-center"
+      >
+        ✕
+      </button>
+    </div>
+  );
+}
+
 export default function TaskListWidget() {
   const {
+    tasks,
     addTask,
     deleteTask,
     toggleComplete,
+    reorderTasks,
     filter,
     setFilter,
     filteredTasks,
   } = useTaskStore();
 
+  const taskSessions = usePomodoroStore((s) => s.taskSessions);
+
   const [newTitle, setNewTitle] = useState('');
   const [newPriority, setNewPriority] = useState<Task['priority']>('medium');
   const [showInput, setShowInput] = useState(false);
+  const [activeId, setActiveId] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const tasks = filteredTasks();
+  const displayedTasks = filteredTasks();
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } })
+  );
 
   const handleAdd = () => {
     const title = newTitle.trim();
@@ -44,6 +146,24 @@ export default function TaskListWidget() {
     if (e.key === 'Enter') handleAdd();
     if (e.key === 'Escape') setShowInput(false);
   };
+
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    setActiveId(null);
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const fromIndex = tasks.findIndex((t) => t.id === active.id);
+    const toIndex = tasks.findIndex((t) => t.id === over.id);
+    if (fromIndex !== -1 && toIndex !== -1) {
+      reorderTasks(fromIndex, toIndex);
+    }
+  };
+
+  const activeTask = activeId ? displayedTasks.find((t) => t.id === activeId) : null;
 
   return (
     <WidgetPanel accent="blue" title="Taches" icon="📋" className="h-full">
@@ -85,41 +205,44 @@ export default function TaskListWidget() {
           </button>
         </div>
 
-        {/* Task list */}
+        {/* Task list with drag & drop */}
         <div className="flex-1 overflow-y-auto no-scrollbar space-y-1">
-          {tasks.length === 0 ? (
+          {displayedTasks.length === 0 ? (
             <p className="text-center text-cyber-text-dim/50 text-xs font-mono py-6">
               {filter.priority ? 'Aucune tache avec ce filtre.' : 'Aucune tache. Ajoute-en une !'}
             </p>
           ) : (
-            tasks.map((task) => (
-              <div
-                key={task.id}
-                className={`group flex items-center gap-2 py-1.5 px-2 rounded-lg transition-all ${
-                  task.is_completed
-                    ? 'opacity-40 hover:opacity-60'
-                    : 'hover:bg-white/[0.03]'
-                }`}
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragStart={handleDragStart}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={displayedTasks.map((t) => t.id)}
+                strategy={verticalListSortingStrategy}
               >
-                <NeonCheckbox
-                  checked={task.is_completed}
-                  onChange={() => toggleComplete(task.id)}
-                  label={task.title}
-                  className="flex-1 min-w-0"
-                />
-                <NeonBadge variant={priorityConfig[task.priority].variant}>
-                  {priorityConfig[task.priority].label}
-                </NeonBadge>
-                <button
-                  onClick={() => {
-                    if (confirm('Supprimer cette tâche ?')) deleteTask(task.id);
-                  }}
-                  className="opacity-0 group-hover:opacity-100 active:opacity-100 text-cyber-red/60 hover:text-cyber-red text-xs transition-opacity flex-shrink-0 min-w-[32px] min-h-[32px] flex items-center justify-center"
-                >
-                  ✕
-                </button>
-              </div>
-            ))
+                {displayedTasks.map((task) => (
+                  <SortableTaskItem
+                    key={task.id}
+                    task={task}
+                    toggleComplete={toggleComplete}
+                    deleteTask={deleteTask}
+                    pomodoroCount={taskSessions?.[task.id] || 0}
+                  />
+                ))}
+              </SortableContext>
+
+              <DragOverlay>
+                {activeTask && (
+                  <div className="glass-panel px-3 py-2 rounded-lg border border-cyber-blue/30 shadow-neon-blue">
+                    <span className="font-mono text-xs text-cyber-text">
+                      {activeTask.title}
+                    </span>
+                  </div>
+                )}
+              </DragOverlay>
+            </DndContext>
           )}
         </div>
 

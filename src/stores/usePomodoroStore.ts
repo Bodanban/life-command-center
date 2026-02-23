@@ -17,6 +17,10 @@ interface PomodoroState {
   longBreakMinutes: number;
   sessionsBeforeLongBreak: number;
 
+  // Task linking
+  currentTaskId: string | null;
+  taskSessions: Record<string, number>;
+
   // Actions
   start: () => void;
   pause: () => void;
@@ -24,6 +28,9 @@ interface PomodoroState {
   reset: () => void;
   skip: () => void;
   tick: () => void;
+  updateSettings: (work: number, brk: number, longBrk: number, sessions: number) => void;
+  linkTask: (taskId: string) => void;
+  unlinkTask: () => void;
 }
 
 function getSessionDuration(type: SessionType, state: PomodoroState): number {
@@ -48,6 +55,9 @@ export const usePomodoroStore = create<PomodoroState>()(
       breakMinutes: 5,
       longBreakMinutes: 15,
       sessionsBeforeLongBreak: 4,
+
+      currentTaskId: null,
+      taskSessions: {},
 
       start: () => {
         set({ isRunning: true, startedAt: Date.now() });
@@ -81,9 +91,17 @@ export const usePomodoroStore = create<PomodoroState>()(
         const state = get();
         let nextType: SessionType;
         let sessions = state.completedSessions;
+        let newTaskSessions = state.taskSessions;
 
         if (state.sessionType === 'work') {
           sessions += 1;
+          // Increment task session count if a task is linked
+          if (state.currentTaskId) {
+            newTaskSessions = {
+              ...newTaskSessions,
+              [state.currentTaskId]: (newTaskSessions[state.currentTaskId] || 0) + 1,
+            };
+          }
           nextType = sessions % state.sessionsBeforeLongBreak === 0 ? 'long_break' : 'break';
         } else {
           nextType = 'work';
@@ -97,7 +115,31 @@ export const usePomodoroStore = create<PomodoroState>()(
           totalTime: duration,
           isRunning: false,
           startedAt: null,
+          taskSessions: newTaskSessions,
         });
+      },
+
+      linkTask: (taskId) => set({ currentTaskId: taskId }),
+      unlinkTask: () => set({ currentTaskId: null }),
+
+      updateSettings: (work, brk, longBrk, sessions) => {
+        const state = get();
+        const newState: Partial<PomodoroState> = {
+          workMinutes: work,
+          breakMinutes: brk,
+          longBreakMinutes: longBrk,
+          sessionsBeforeLongBreak: sessions,
+        };
+        // Reset timer if not running
+        if (!state.isRunning) {
+          const duration = state.sessionType === 'work' ? work * 60
+            : state.sessionType === 'break' ? brk * 60
+            : longBrk * 60;
+          newState.timeRemaining = duration;
+          newState.totalTime = duration;
+          newState.startedAt = null;
+        }
+        set(newState);
       },
 
       tick: () => {
@@ -144,6 +186,8 @@ export const usePomodoroStore = create<PomodoroState>()(
         breakMinutes: state.breakMinutes,
         longBreakMinutes: state.longBreakMinutes,
         sessionsBeforeLongBreak: state.sessionsBeforeLongBreak,
+        currentTaskId: state.currentTaskId,
+        taskSessions: state.taskSessions,
       }),
     }
   )

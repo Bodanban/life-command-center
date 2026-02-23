@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import WidgetPanel from '@/components/layout/WidgetPanel';
+import { useSettingsStore } from '@/stores/useSettingsStore';
 
 interface WeatherData {
   temp: number;
@@ -25,9 +26,9 @@ const weatherEmojis: Record<string, string> = {
 };
 
 const API_KEY = process.env.NEXT_PUBLIC_OPENWEATHERMAP_API_KEY || '';
-const CITY = process.env.NEXT_PUBLIC_DEFAULT_CITY || 'Paris';
 
 export default function WeatherWidget() {
+  const weatherCity = useSettingsStore((s) => s.weatherCity);
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [error, setError] = useState(false);
 
@@ -40,7 +41,7 @@ export default function WeatherWidget() {
     const fetchWeather = async () => {
       try {
         const res = await fetch(
-          `https://api.openweathermap.org/data/2.5/weather?q=${CITY}&appid=${API_KEY}&units=metric&lang=fr`
+          `https://api.openweathermap.org/data/2.5/weather?q=${weatherCity}&appid=${API_KEY}&units=metric&lang=fr`
         );
         if (!res.ok) throw new Error('Weather API error');
         const data = await res.json();
@@ -61,7 +62,7 @@ export default function WeatherWidget() {
     fetchWeather();
     const interval = setInterval(fetchWeather, 30 * 60 * 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [weatherCity]);
 
   return (
     <WidgetPanel accent="yellow" title="Meteo" icon="🌤" className="h-full">

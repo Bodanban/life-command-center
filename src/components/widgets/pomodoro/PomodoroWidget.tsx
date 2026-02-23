@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import WidgetPanel from '@/components/layout/WidgetPanel';
 import NeonButton from '@/components/ui/NeonButton';
 import { usePomodoroStore } from '@/stores/usePomodoroStore';
+import { useTaskStore } from '@/stores/useTaskStore';
 
 export default function PomodoroWidget() {
   const {
@@ -13,13 +14,27 @@ export default function PomodoroWidget() {
     sessionType,
     completedSessions,
     startedAt,
+    currentTaskId,
     start,
     pause,
     resume,
     reset,
     skip,
     tick,
+    linkTask,
+    unlinkTask,
   } = usePomodoroStore();
+
+  const tasks = useTaskStore((s) => s.tasks);
+  const incompleteTasks = tasks.filter((t) => !t.is_completed);
+  const linkedTask = currentTaskId ? tasks.find((t) => t.id === currentTaskId) : null;
+
+  // Auto-unlink if task was deleted
+  useEffect(() => {
+    if (currentTaskId && !tasks.find((t) => t.id === currentTaskId)) {
+      unlinkTask();
+    }
+  }, [currentTaskId, tasks, unlinkTask]);
 
   // Tick every second
   useEffect(() => {
@@ -70,28 +85,58 @@ export default function PomodoroWidget() {
 
   return (
     <WidgetPanel accent={colors.accent} title="Pomodoro" icon="⏱" className="h-full">
-      <div className="flex flex-col items-center justify-center h-full gap-3">
+      <div className="flex flex-col items-center justify-center h-full gap-2">
         {/* Session type label */}
         <span className={`font-display text-[10px] uppercase tracking-[0.3em] ${colors.text}`}>
           {sessionLabels[sessionType]}
         </span>
 
+        {/* Linked task indicator */}
+        <div className="h-5 flex items-center">
+          {linkedTask ? (
+            <div className="flex items-center gap-1.5 max-w-[200px]">
+              <span className="font-mono text-[9px] text-cyber-yellow truncate">
+                📎 {linkedTask.title}
+              </span>
+              <button
+                onClick={unlinkTask}
+                className="text-[9px] text-cyber-text-dim/40 hover:text-cyber-red transition-colors flex-shrink-0"
+              >
+                ✕
+              </button>
+            </div>
+          ) : incompleteTasks.length > 0 ? (
+            <select
+              onChange={(e) => { if (e.target.value) linkTask(e.target.value); }}
+              value=""
+              className="bg-transparent border border-white/10 rounded px-2 py-0.5 font-mono text-[9px] text-cyber-text-dim/60 outline-none max-w-[180px] cursor-pointer"
+            >
+              <option value="" className="bg-cyber-bg-deep">Lier une tache...</option>
+              {incompleteTasks.map((t) => (
+                <option key={t.id} value={t.id} className="bg-cyber-bg-deep">
+                  {t.title}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <span className="font-mono text-[8px] text-cyber-text-dim/30">Aucune tache</span>
+          )}
+        </div>
+
         {/* Timer circle */}
         <div className="relative">
-          <svg width="170" height="170" className="-rotate-90">
-            {/* Background circle */}
+          <svg width="160" height="160" className="-rotate-90">
             <circle
-              cx="85"
-              cy="85"
+              cx="80"
+              cy="80"
               r={radius}
               fill="none"
               stroke="rgba(255,255,255,0.05)"
               strokeWidth="4"
             />
-            {/* Progress circle */}
             <circle
-              cx="85"
-              cy="85"
+              cx="80"
+              cy="80"
               r={radius}
               fill="none"
               stroke={colors.stroke}
@@ -106,7 +151,6 @@ export default function PomodoroWidget() {
             />
           </svg>
 
-          {/* Time display */}
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             <span className={`font-display text-3xl font-bold ${colors.text} ${colors.glow}`}>
               {minutes}:{seconds}
