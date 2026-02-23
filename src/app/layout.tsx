@@ -8,6 +8,7 @@ export const metadata: Metadata = {
     icon: '/life-command-center/icons/icon-192x192.png',
     apple: '/life-command-center/icons/icon-192x192.png',
   },
+  manifest: '/life-command-center/manifest.webmanifest',
 };
 
 export const viewport: Viewport = {
@@ -26,6 +27,11 @@ export default function RootLayout({
   return (
     <html lang="fr" className="dark">
       <head>
+        <link rel="manifest" href="/life-command-center/manifest.webmanifest" />
+        <link rel="apple-touch-icon" href="/life-command-center/icons/icon-192x192.png" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <script
           dangerouslySetInnerHTML={{
             __html: `
