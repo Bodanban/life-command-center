@@ -27,8 +27,8 @@
       0deg,
       transparent,
       transparent 2px,
-      rgba(0, 0, 0, 0.05) 2px,
-      rgba(0, 0, 0, 0.05) 4px
+      rgba(0, 0, 0, 0.04) 2px,
+      rgba(0, 0, 0, 0.04) 4px
     );
     pointer-events: none;
     z-index: 9999;
@@ -47,8 +47,8 @@
   .glass-panel {
     @apply relative rounded-xl border border-white/[0.08] overflow-hidden;
     background: rgba(22, 33, 62, 0.6);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
   }
 
   .glass-panel::before {
@@ -59,9 +59,9 @@
     padding: 1px;
     background: linear-gradient(
       135deg,
-      rgba(0, 212, 255, 0.15),
+      rgba(0, 212, 255, 0.2),
       transparent 50%,
-      rgba(180, 0, 255, 0.1)
+      rgba(180, 0, 255, 0.15)
     );
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
@@ -103,47 +103,62 @@
     text-shadow: 0 0 7px rgba(255, 0, 64, 0.6), 0 0 20px rgba(255, 0, 64, 0.3);
   }
 
-  /* Widget accent top border */
+  /* Widget accent top border - BOOSTED GLOW */
   .widget-accent-blue {
     border-top: 2px solid #00d4ff;
-    box-shadow: 0 -2px 10px rgba(0, 212, 255, 0.2);
+    box-shadow:
+      0 -4px 15px rgba(0, 212, 255, 0.3),
+      0 -1px 30px rgba(0, 212, 255, 0.1),
+      inset 0 1px 15px rgba(0, 212, 255, 0.05);
   }
 
   .widget-accent-green {
     border-top: 2px solid #00ff88;
-    box-shadow: 0 -2px 10px rgba(0, 255, 136, 0.2);
+    box-shadow:
+      0 -4px 15px rgba(0, 255, 136, 0.3),
+      0 -1px 30px rgba(0, 255, 136, 0.1),
+      inset 0 1px 15px rgba(0, 255, 136, 0.05);
   }
 
   .widget-accent-purple {
     border-top: 2px solid #b400ff;
-    box-shadow: 0 -2px 10px rgba(180, 0, 255, 0.2);
+    box-shadow:
+      0 -4px 15px rgba(180, 0, 255, 0.3),
+      0 -1px 30px rgba(180, 0, 255, 0.1),
+      inset 0 1px 15px rgba(180, 0, 255, 0.05);
   }
 
   .widget-accent-red {
     border-top: 2px solid #ff0040;
-    box-shadow: 0 -2px 10px rgba(255, 0, 64, 0.2);
+    box-shadow:
+      0 -4px 15px rgba(255, 0, 64, 0.3),
+      0 -1px 30px rgba(255, 0, 64, 0.1),
+      inset 0 1px 15px rgba(255, 0, 64, 0.05);
   }
 
   .widget-accent-yellow {
     border-top: 2px solid #ffd700;
-    box-shadow: 0 -2px 10px rgba(255, 215, 0, 0.2);
+    box-shadow:
+      0 -4px 15px rgba(255, 215, 0, 0.3),
+      0 -1px 30px rgba(255, 215, 0, 0.1),
+      inset 0 1px 15px rgba(255, 215, 0, 0.05);
   }
 }
 
 /* ===== SCROLLBAR ===== */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 4px;
+  height: 4px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(10, 10, 15, 0.5);
-  border-radius: 3px;
+  background: rgba(10, 10, 15, 0.3);
+  border-radius: 2px;
 }
 
 ::-webkit-scrollbar-thumb {
   background: rgba(0, 212, 255, 0.3);
-  border-radius: 3px;
+  border-radius: 2px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -175,35 +190,73 @@
   animation: expand-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* ===== AMBIENT GLOW ===== */
+/* ===== AMBIENT GLOW - BOOSTED ===== */
 @keyframes ambient-shift {
   0%, 100% {
     background-position: 0% 50%;
+    opacity: 0.8;
+  }
+  25% {
+    opacity: 1;
   }
   50% {
     background-position: 100% 50%;
+    opacity: 0.8;
+  }
+  75% {
+    opacity: 1;
   }
 }
 
-/* Subtle ambient glow behind the entire grid */
+/* Intense ambient glow behind the entire grid */
 .ambient-glow {
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 0;
-  background: radial-gradient(ellipse 600px 400px at 20% 20%, rgba(0, 212, 255, 0.04), transparent),
-              radial-gradient(ellipse 500px 300px at 80% 80%, rgba(180, 0, 255, 0.04), transparent),
-              radial-gradient(ellipse 400px 400px at 50% 50%, rgba(0, 255, 136, 0.02), transparent);
-  animation: ambient-shift 20s ease-in-out infinite;
+  background:
+    radial-gradient(ellipse 800px 500px at 15% 15%, rgba(0, 212, 255, 0.08), transparent),
+    radial-gradient(ellipse 600px 400px at 85% 85%, rgba(180, 0, 255, 0.08), transparent),
+    radial-gradient(ellipse 500px 500px at 50% 40%, rgba(0, 255, 136, 0.04), transparent),
+    radial-gradient(ellipse 400px 300px at 70% 20%, rgba(255, 215, 0, 0.03), transparent);
+  animation: ambient-shift 15s ease-in-out infinite;
   background-size: 200% 200%;
+}
+
+/* ===== GRID GAP GLOW LINES ===== */
+@keyframes grid-pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+}
+
+.grid-glow-lines {
+  position: relative;
+}
+
+/* Horizontal and vertical glow lines between widgets */
+.grid-glow-lines::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    /* Horizontal glow lines */
+    linear-gradient(0deg, transparent 24.5%, rgba(0, 212, 255, 0.06) 24.8%, rgba(0, 212, 255, 0.06) 25.2%, transparent 25.5%),
+    linear-gradient(0deg, transparent 49.5%, rgba(180, 0, 255, 0.05) 49.8%, rgba(180, 0, 255, 0.05) 50.2%, transparent 50.5%),
+    linear-gradient(0deg, transparent 74.5%, rgba(0, 255, 136, 0.05) 74.8%, rgba(0, 255, 136, 0.05) 75.2%, transparent 75.5%),
+    /* Vertical glow lines */
+    linear-gradient(90deg, transparent 32.8%, rgba(0, 212, 255, 0.04) 33%, rgba(0, 212, 255, 0.04) 33.5%, transparent 33.7%),
+    linear-gradient(90deg, transparent 66%, rgba(180, 0, 255, 0.04) 66.3%, rgba(180, 0, 255, 0.04) 66.7%, transparent 67%);
+  animation: grid-pulse 4s ease-in-out infinite;
 }
 
 /* ===== STAGGERED WIDGET ENTRY ===== */
 @keyframes widget-enter {
   from {
     opacity: 0;
-    transform: translateY(12px) scale(0.97);
-    filter: blur(4px);
+    transform: translateY(15px) scale(0.95);
+    filter: blur(6px);
   }
   to {
     opacity: 1;
@@ -212,22 +265,31 @@
   }
 }
 
-.widget-stagger > div:nth-child(1) { animation: widget-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both; }
-.widget-stagger > div:nth-child(2) { animation: widget-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.12s both; }
-.widget-stagger > div:nth-child(3) { animation: widget-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.19s both; }
-.widget-stagger > div:nth-child(4) { animation: widget-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.26s both; }
-.widget-stagger > div:nth-child(5) { animation: widget-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.33s both; }
-.widget-stagger > div:nth-child(6) { animation: widget-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.40s both; }
-.widget-stagger > div:nth-child(7) { animation: widget-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.47s both; }
-.widget-stagger > div:nth-child(8) { animation: widget-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.54s both; }
+.widget-stagger > div:nth-child(1) { animation: widget-enter 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both; }
+.widget-stagger > div:nth-child(2) { animation: widget-enter 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.12s both; }
+.widget-stagger > div:nth-child(3) { animation: widget-enter 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.19s both; }
+.widget-stagger > div:nth-child(4) { animation: widget-enter 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.26s both; }
+.widget-stagger > div:nth-child(5) { animation: widget-enter 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.33s both; }
+.widget-stagger > div:nth-child(6) { animation: widget-enter 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.40s both; }
+.widget-stagger > div:nth-child(7) { animation: widget-enter 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.47s both; }
+.widget-stagger > div:nth-child(8) { animation: widget-enter 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.54s both; }
 
-/* ===== ENHANCED GLASS PANEL ===== */
+/* ===== ENHANCED GLASS PANEL - BOOSTED HOVER ===== */
 .glass-panel:hover {
-  border-color: rgba(255, 255, 255, 0.12);
-  box-shadow: 0 0 1px rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.15);
+  transition: all 0.3s ease;
 }
 
-/* ===== SCAN LINE SWEEP (subtle) ===== */
+.glass-panel:hover::before {
+  background: linear-gradient(
+    135deg,
+    rgba(0, 212, 255, 0.3),
+    transparent 50%,
+    rgba(180, 0, 255, 0.2)
+  );
+}
+
+/* ===== SCAN LINE SWEEP (battery-optimized) ===== */
 @keyframes scan-sweep {
   0% { transform: translateY(-100%); }
   100% { transform: translateY(100vh); }
@@ -238,15 +300,39 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.15), transparent);
+  height: 3px;
+  background: linear-gradient(90deg, transparent 5%, rgba(0, 212, 255, 0.2) 30%, rgba(180, 0, 255, 0.15) 70%, transparent 95%);
   pointer-events: none;
   z-index: 9998;
-  animation: scan-sweep 6s linear infinite;
-  opacity: 0.5;
+  animation: scan-sweep 5s steps(30) infinite;
+  opacity: 0.6;
+  will-change: transform;
 }
 
-/* ===== CORNER ACCENTS (HUD-style) ===== */
+/* Second scan line - offset for depth */
+.scan-line-2 {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.12), transparent);
+  pointer-events: none;
+  z-index: 9998;
+  animation: scan-sweep 8s steps(30) infinite;
+  animation-delay: -3s;
+  opacity: 0.4;
+  will-change: transform;
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .scan-line, .scan-line-2 { animation: none; display: none; }
+  .ambient-glow { animation: none; }
+  .neon-breathe { animation: none; }
+}
+
+/* ===== CORNER ACCENTS (HUD-style) - BOOSTED ===== */
 .hud-corners::after {
   content: '';
   position: absolute;
@@ -254,12 +340,50 @@
   pointer-events: none;
   border-radius: inherit;
   background:
-    linear-gradient(to right, rgba(0, 212, 255, 0.4) 0%, transparent 8%) top left,
-    linear-gradient(to bottom, rgba(0, 212, 255, 0.4) 0%, transparent 12%) top left,
-    linear-gradient(to left, rgba(180, 0, 255, 0.3) 0%, transparent 8%) bottom right,
-    linear-gradient(to top, rgba(180, 0, 255, 0.3) 0%, transparent 12%) bottom right;
+    linear-gradient(to right, rgba(0, 212, 255, 0.5) 0%, transparent 10%) top left,
+    linear-gradient(to bottom, rgba(0, 212, 255, 0.5) 0%, transparent 15%) top left,
+    linear-gradient(to left, rgba(180, 0, 255, 0.4) 0%, transparent 10%) bottom right,
+    linear-gradient(to top, rgba(180, 0, 255, 0.4) 0%, transparent 15%) bottom right;
   background-repeat: no-repeat;
-  background-size: 20px 2px, 2px 16px, 20px 2px, 2px 16px;
+  background-size: 24px 2px, 2px 20px, 24px 2px, 2px 20px;
+}
+
+/* ===== NEON BREATHE ANIMATION ===== */
+@keyframes neon-breathe {
+  0%, 100% {
+    filter: brightness(1) drop-shadow(0 0 2px currentColor);
+  }
+  50% {
+    filter: brightness(1.2) drop-shadow(0 0 8px currentColor);
+  }
+}
+
+.neon-breathe {
+  animation: neon-breathe 3s ease-in-out infinite;
+}
+
+/* ===== EDGE GLOW BETWEEN CARDS ===== */
+@keyframes edge-pulse {
+  0%, 100% { opacity: 0.15; }
+  50% { opacity: 0.4; }
+}
+
+.widget-stagger {
+  position: relative;
+}
+
+/* Subtle glow light particles floating */
+@keyframes float-particle {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+    opacity: 0;
+  }
+  10% { opacity: 0.6; }
+  50% {
+    transform: translateY(-30px) translateX(15px);
+    opacity: 0.3;
+  }
+  90% { opacity: 0; }
 }
 
 /* ===== UTILITIES ===== */

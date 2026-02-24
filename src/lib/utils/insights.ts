@@ -38,6 +38,7 @@ export function generateInsights({
   taskSessions,
   morningRoutineRate,
   bedtimeRoutineRate,
+  weeklyRoutineRate,
 }: {
   scores: DailyScore[];
   streak: number;
@@ -55,6 +56,7 @@ export function generateInsights({
   taskSessions: Record<string, number>;
   morningRoutineRate?: number;
   bedtimeRoutineRate?: number;
+  weeklyRoutineRate?: number;
 }): Insight[] {
   const insights: Insight[] = [];
   const hour = new Date().getHours();
@@ -227,6 +229,23 @@ export function generateInsights({
       message: 'N\'oublie pas ta routine du soir !',
       color: 'yellow',
       priority: 6,
+    });
+  }
+
+  // Programme hebdomadaire
+  if (weeklyRoutineRate !== undefined && weeklyRoutineRate === 100) {
+    insights.push({
+      icon: '📅',
+      message: 'Programme hebdomadaire complete ! Tu geres.',
+      color: 'green',
+      priority: 5,
+    });
+  } else if (weeklyRoutineRate !== undefined && hour >= 18 && weeklyRoutineRate < 30) {
+    insights.push({
+      icon: '📅',
+      message: 'Programme hebdo a peine entame. Il reste du temps !',
+      color: 'yellow',
+      priority: 7,
     });
   }
 

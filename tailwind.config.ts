@@ -27,12 +27,12 @@ const config: Config = {
         display: ['Orbitron', 'sans-serif'],
       },
       boxShadow: {
-        'neon-blue': '0 0 5px #00d4ff, 0 0 20px rgba(0,212,255,0.3)',
-        'neon-purple': '0 0 5px #b400ff, 0 0 20px rgba(180,0,255,0.3)',
-        'neon-green': '0 0 5px #00ff88, 0 0 20px rgba(0,255,136,0.3)',
-        'neon-red': '0 0 5px #ff0040, 0 0 20px rgba(255,0,64,0.3)',
-        'neon-yellow': '0 0 5px #ffd700, 0 0 20px rgba(255,215,0,0.3)',
-        'glass': '0 8px 32px rgba(0,0,0,0.4)',
+        'neon-blue': '0 0 5px #00d4ff, 0 0 20px rgba(0,212,255,0.4), 0 0 40px rgba(0,212,255,0.1)',
+        'neon-purple': '0 0 5px #b400ff, 0 0 20px rgba(180,0,255,0.4), 0 0 40px rgba(180,0,255,0.1)',
+        'neon-green': '0 0 5px #00ff88, 0 0 20px rgba(0,255,136,0.4), 0 0 40px rgba(0,255,136,0.1)',
+        'neon-red': '0 0 5px #ff0040, 0 0 20px rgba(255,0,64,0.4), 0 0 40px rgba(255,0,64,0.1)',
+        'neon-yellow': '0 0 5px #ffd700, 0 0 20px rgba(255,215,0,0.4), 0 0 40px rgba(255,215,0,0.1)',
+        'glass': '0 8px 32px rgba(0,0,0,0.5), 0 0 1px rgba(0,212,255,0.1)',
       },
       animation: {
         'pulse-neon': 'pulse-neon 2s ease-in-out infinite',
@@ -94,7 +94,7 @@ const config: Config = {
       },
       backgroundImage: {
         'grid-pattern':
-          'linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px)',
+          'linear-gradient(rgba(0,212,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0,212,255,0.04) 1px, transparent 1px)',
       },
       backgroundSize: {
         'grid': '40px 40px',

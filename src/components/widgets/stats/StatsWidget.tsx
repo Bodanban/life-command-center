@@ -5,7 +5,7 @@ import WidgetPanel from '@/components/layout/WidgetPanel';
 import { useTaskStore } from '@/stores/useTaskStore';
 import { usePomodoroStore } from '@/stores/usePomodoroStore';
 import { useHabitStore } from '@/stores/useHabitStore';
-import { useObjectiveStore } from '@/stores/useObjectiveStore';
+import { useObjectiveStore, getMorningQuestCount, getBedtimeQuestCount, getWeeklyQuestCount } from '@/stores/useObjectiveStore';
 import {
   useDailyScoreStore,
   calculateGlobalScore,
@@ -24,7 +24,6 @@ import {
   ReferenceLine,
 } from 'recharts';
 import { generateInsights, getInsightColor, type Insight } from '@/lib/utils/insights';
-import { useRoutineStore } from '@/stores/useRoutineStore';
 
 function todayString(): string {
   return new Date().toISOString().split('T')[0];
@@ -63,8 +62,32 @@ export default function StatsWidget() {
   const habits = useHabitStore((s) => s.habits);
   const isCompletedOnDate = useHabitStore((s) => s.isCompletedOnDate);
   const objectives = useObjectiveStore((s) => s.objectives);
-  const morningRoutineRate = useRoutineStore((s) => s.getCompletionRate('morning'));
-  const bedtimeRoutineRate = useRoutineStore((s) => s.getCompletionRate('bedtime'));
+  const isQuestCompleted = useObjectiveStore((s) => s.isQuestCompleted);
+
+  // Compute routine rates from quest completions (using real active step counts)
+  const morningRoutineRate = useMemo(() => {
+    const { total, ids } = getMorningQuestCount();
+    if (total === 0) return 100;
+    const completed = ids.filter((id) => isQuestCompleted(id)).length;
+    return Math.round((completed / total) * 100);
+  }, [isQuestCompleted]);
+  const bedtimeRoutineRate = useMemo(() => {
+    const { total, ids } = getBedtimeQuestCount();
+    if (total === 0) return 100;
+    const completed = ids.filter((id) => isQuestCompleted(id)).length;
+    return Math.round((completed / total) * 100);
+  }, [isQuestCompleted]);
+  const weeklyRoutineRate = useMemo(() => {
+    const { total, ids } = getWeeklyQuestCount();
+    if (total === 0) return 100;
+    const completed = ids.filter((id) => isQuestCompleted(id)).length;
+    return Math.round((completed / total) * 100);
+  }, [isQuestCompleted]);
+
+  // Combined routine rate (average of morning + weekly + bedtime)
+  const routineRate = useMemo(() => {
+    return Math.round((morningRoutineRate + weeklyRoutineRate + bedtimeRoutineRate) / 3);
+  }, [morningRoutineRate, weeklyRoutineRate, bedtimeRoutineRate]);
 
   const saveScore = useDailyScoreStore((s) => s.saveScore);
   const getScores = useDailyScoreStore((s) => s.getScores);
@@ -94,7 +117,7 @@ export default function StatsWidget() {
         ? Math.round((completedHabits / activeHabits.length) * 100)
         : 0;
 
-    const globalScore = calculateGlobalScore(habitScore, objectiveScore, taskScore, completedSessions);
+    const globalScore = calculateGlobalScore(habitScore, objectiveScore, taskScore, completedSessions, routineRate);
 
     return {
       habitScore, objectiveScore, taskScore,
@@ -103,8 +126,9 @@ export default function StatsWidget() {
       totalHabits: activeHabits.length,
       completedTasks, totalTasks,
       completedObjectives, totalObjectives,
+      routineRate,
     };
-  }, [tasks, objectives, habits, completedSessions, isCompletedOnDate, today]);
+  }, [tasks, objectives, habits, completedSessions, isCompletedOnDate, today, routineRate]);
 
   useEffect(() => {
     saveScore({
@@ -159,7 +183,8 @@ export default function StatsWidget() {
     taskSessions: taskSessions || {},
     morningRoutineRate,
     bedtimeRoutineRate,
-  }), [last14, streak, trend, avg7, bestScore, todayScores, habits, habitCompletions, completedSessions, taskSessions, morningRoutineRate, bedtimeRoutineRate]);
+    weeklyRoutineRate,
+  }), [last14, streak, trend, avg7, bestScore, todayScores, habits, habitCompletions, completedSessions, taskSessions, morningRoutineRate, bedtimeRoutineRate, weeklyRoutineRate]);
 
   const scoreColor =
     todayScores.globalScore >= 80 ? '#00ff88'
@@ -263,6 +288,7 @@ function CompactView({
     totalTasks: number;
     completedObjectives: number;
     totalObjectives: number;
+    routineRate: number;
   };
   scoreColor: string;
   radius: number;
@@ -299,10 +325,11 @@ function CompactView({
             </div>
           </div>
           <div className="w-full space-y-1">
+            <ScoreBar label="Routines" value={todayScores.routineRate} color="#00ff88" detail={`${todayScores.routineRate}%`} />
             <ScoreBar label="Habitudes" value={todayScores.habitScore} color="#b400ff" detail={`${todayScores.completedHabits}/${todayScores.totalHabits}`} />
-            <ScoreBar label="Objectifs" value={todayScores.objectiveScore} color="#00ff88" detail={`${todayScores.completedObjectives}/${todayScores.totalObjectives}`} />
-            <ScoreBar label="Taches" value={todayScores.taskScore} color="#00d4ff" detail={`${todayScores.completedTasks}/${todayScores.totalTasks}`} />
-            <ScoreBar label="Pomodoro" value={Math.min(100, (todayScores.pomodoroSessions / 8) * 100)} color="#ffd700" detail={`${todayScores.pomodoroSessions}/8`} />
+            <ScoreBar label="Objectifs" value={todayScores.objectiveScore} color="#00d4ff" detail={`${todayScores.completedObjectives}/${todayScores.totalObjectives}`} />
+            <ScoreBar label="Taches" value={todayScores.taskScore} color="#ffd700" detail={`${todayScores.completedTasks}/${todayScores.totalTasks}`} />
+            <ScoreBar label="Pomodoro" value={Math.min(100, (todayScores.pomodoroSessions / 8) * 100)} color="#ff6ec7" detail={`${todayScores.pomodoroSessions}/8`} />
           </div>
         </div>
 

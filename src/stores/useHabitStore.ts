@@ -30,16 +30,14 @@ function dateString(date: Date): string {
   return date.toISOString().split('T')[0];
 }
 
-// 13 habitudes du TRACKER HABIT - tes non-négociables quotidiens
+// Habitudes du TRACKER HABIT - tes non-négociables quotidiens
+// (les quêtes sport 50 Pompes/Squats/Crunchs sont dans les Objectifs du Jour)
 const DEFAULT_HABITS: { name: string; color: string; icon: string }[] = [
   { name: 'Prière', color: '#ffd700', icon: '🙏' },
   { name: 'Dormir à 23h', color: '#7b68ee', icon: '🌙' },
   { name: 'Méditation', color: '#b400ff', icon: '🧘' },
   { name: '4H Work', color: '#00d4ff', icon: '💻' },
   { name: 'Sport', color: '#00ff88', icon: '💪' },
-  { name: '50 Pompes', color: '#00ff88', icon: '🏋️' },
-  { name: '50 Squats', color: '#00d4ff', icon: '🦵' },
-  { name: '50 Crunchs', color: '#ff6ec7', icon: '🔥' },
   { name: 'Lecture 15 Pages', color: '#ff6ec7', icon: '📖' },
   { name: 'Tracking', color: '#00d4ff', icon: '📊' },
   { name: 'Visualisation', color: '#b400ff', icon: '🎯' },
@@ -49,6 +47,9 @@ const DEFAULT_HABITS: { name: string; color: string; icon: string }[] = [
   { name: 'No Alcohol', color: '#ff0040', icon: '🚫' },
   { name: 'No Cigarettes', color: '#ff0040', icon: '🚭' },
 ];
+
+// Habits that were moved to daily objectives - auto-remove from habit tracker
+const REMOVED_HABITS = ['50 Pompes', '50 Squats', '50 Crunchs'];
 
 export const useHabitStore = create<HabitState>()(
   persist(
@@ -153,7 +154,13 @@ export const useHabitStore = create<HabitState>()(
       },
 
       initDefaultHabits: () => {
-        const existing = get().habits;
+        let existing = get().habits;
+        // Auto-remove habits that were moved to daily objectives
+        const removedSet = new Set(REMOVED_HABITS);
+        const hadRemoved = existing.some((h) => removedSet.has(h.name));
+        if (hadRemoved) {
+          existing = existing.filter((h) => !removedSet.has(h.name));
+        }
         if (existing.length === 0) {
           // First time: create all defaults
           const habits: Habit[] = DEFAULT_HABITS.map((h, i) => ({
@@ -174,7 +181,7 @@ export const useHabitStore = create<HabitState>()(
         // Add any missing default habits
         const existingNames = new Set(existing.map((h) => h.name));
         const missing = DEFAULT_HABITS.filter((h) => !existingNames.has(h.name));
-        if (missing.length > 0) {
+        if (missing.length > 0 || hadRemoved) {
           const newHabits: Habit[] = missing.map((h, i) => ({
             id: `default_${existing.length + i}_${Date.now().toString(36)}`,
             user_id: 'local',

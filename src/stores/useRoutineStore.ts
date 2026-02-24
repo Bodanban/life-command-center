@@ -1,10 +1,14 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 
 export interface RoutineStep {
   name: string;
   details: Record<number, string>; // 1=Lun, 2=Mar, ..., 7=Dim
   activeDays: number[]; // [1,2,3,4,5,6,7]
+}
+
+export interface WeeklyTask {
+  name: string;
+  icon: string;
 }
 
 const MORNING_STEPS: RoutineStep[] = [
@@ -108,86 +112,77 @@ const BEDTIME_STEPS: RoutineStep[] = [
   },
 ];
 
-function getTodayString(): string {
-  return new Date().toISOString().split('T')[0];
-}
+// Programme hebdomadaire : 3 taches par jour (9h-21h)
+const WEEKLY_TASKS: Record<number, WeeklyTask[]> = {
+  1: [ // Lundi
+    { name: 'Planifier la semaine', icon: '📋' },
+    { name: 'Brainstorm contenu createur', icon: '💡' },
+    { name: 'Ranger espace de vie', icon: '🏠' },
+  ],
+  2: [ // Mardi
+    { name: 'Creer/filmer contenu', icon: '🎬' },
+    { name: '30min apprentissage montage/storytelling', icon: '📚' },
+    { name: 'Interagir communaute reseaux', icon: '💬' },
+  ],
+  3: [ // Mercredi
+    { name: 'Soin visage approfondi', icon: '✨' },
+    { name: 'Revue garde-robe/style', icon: '👔' },
+    { name: 'Recherche tendances mode/grooming', icon: '🔍' },
+  ],
+  4: [ // Jeudi
+    { name: 'Courses semaine (nourriture + produits)', icon: '🛒' },
+    { name: 'Meal prep/planifier repas', icon: '🥗' },
+    { name: 'Gestion administrative', icon: '📄' },
+  ],
+  5: [ // Vendredi
+    { name: 'Sortir/voir des gens', icon: '🤝' },
+    { name: 'Appeler famille/proches', icon: '📞' },
+    { name: 'Bilan semaine + ajuster objectifs', icon: '🎯' },
+  ],
+  6: [ // Samedi
+    { name: 'Activite plaisir/detente', icon: '🎮' },
+    { name: 'Projet personnel/side hustle', icon: '🚀' },
+    { name: 'Soins personnels approfondis', icon: '💆' },
+  ],
+  7: [ // Dimanche
+    { name: 'Eglise/temps spirituel', icon: '⛪' },
+    { name: 'Meditation longue + journaling', icon: '🧘' },
+    { name: 'Preparer la semaine', icon: '📅' },
+  ],
+};
 
 // JS getDay: 0=Dim, 1=Lun... → notre mapping: 1=Lun, 2=Mar... 7=Dim
-function getDayOfWeek(): number {
+export function getDayOfWeek(): number {
   const jsDay = new Date().getDay();
   return jsDay === 0 ? 7 : jsDay;
 }
 
-interface RoutineState {
-  completions: Record<string, boolean>; // "morning_0_2026-02-23" → true
-  lastDate: string;
-  toggleStep: (type: 'morning' | 'bedtime', stepIndex: number) => void;
-  isStepCompleted: (type: 'morning' | 'bedtime', stepIndex: number) => boolean;
-  getActiveStepsForToday: (type: 'morning' | 'bedtime') => { step: RoutineStep; index: number; detail: string }[];
-  getCompletionRate: (type: 'morning' | 'bedtime') => number;
+// Phase based on hour: morning (5-9), weekly (9-21), bedtime (21-0), off (0-5)
+export function getCurrentPhase(hour?: number): 'morning' | 'weekly' | 'bedtime' | 'off' {
+  const h = hour ?? new Date().getHours();
+  if (h >= 5 && h < 9) return 'morning';
+  if (h >= 9 && h < 21) return 'weekly';
+  if (h >= 21) return 'bedtime';
+  return 'off'; // 0h-5h
 }
 
-export const useRoutineStore = create<RoutineState>()(
-  persist(
-    (set, get) => ({
-      completions: {},
-      lastDate: getTodayString(),
+export function getWeeklyTasksForToday(): WeeklyTask[] {
+  const day = getDayOfWeek();
+  return WEEKLY_TASKS[day] || [];
+}
 
-      toggleStep: (type, stepIndex) => {
-        const today = getTodayString();
-        const key = `${type}_${stepIndex}_${today}`;
-        set((state) => {
-          const newCompletions = { ...state.completions };
-          if (newCompletions[key]) {
-            delete newCompletions[key];
-          } else {
-            newCompletions[key] = true;
-          }
-          return { completions: newCompletions, lastDate: today };
-        });
-      },
+// Simplified store: only provides step data for display.
+// All completion tracking is handled by useObjectiveStore (quest_morning_*, quest_bedtime_*, quest_weekly_*).
+interface RoutineState {
+  getActiveStepsForToday: (type: 'morning' | 'bedtime') => { step: RoutineStep; index: number; detail: string }[];
+}
 
-      isStepCompleted: (type, stepIndex) => {
-        const today = getTodayString();
-        const state = get();
-        // Auto-reset if date changed
-        if (state.lastDate !== today) {
-          // Clear old completions
-          const newCompletions: Record<string, boolean> = {};
-          for (const [key, val] of Object.entries(state.completions)) {
-            if (key.endsWith(today)) {
-              newCompletions[key] = val;
-            }
-          }
-          set({ completions: newCompletions, lastDate: today });
-        }
-        return !!state.completions[`${type}_${stepIndex}_${today}`];
-      },
-
-      getActiveStepsForToday: (type) => {
-        const day = getDayOfWeek();
-        const steps = type === 'morning' ? MORNING_STEPS : BEDTIME_STEPS;
-        return steps
-          .map((step, index) => ({ step, index, detail: step.details[day] || '-' }))
-          .filter(({ step }) => step.activeDays.includes(day));
-      },
-
-      getCompletionRate: (type) => {
-        const state = get();
-        const activeSteps = state.getActiveStepsForToday(type);
-        if (activeSteps.length === 0) return 100;
-        const completed = activeSteps.filter(({ index }) =>
-          state.isStepCompleted(type, index)
-        ).length;
-        return Math.round((completed / activeSteps.length) * 100);
-      },
-    }),
-    {
-      name: 'life-command-routine',
-      partialize: (state) => ({
-        completions: state.completions,
-        lastDate: state.lastDate,
-      }),
-    }
-  )
-);
+export const useRoutineStore = create<RoutineState>()(() => ({
+  getActiveStepsForToday: (type) => {
+    const day = getDayOfWeek();
+    const steps = type === 'morning' ? MORNING_STEPS : BEDTIME_STEPS;
+    return steps
+      .map((step, index) => ({ step, index, detail: step.details[day] || '-' }))
+      .filter(({ step }) => step.activeDays.includes(day));
+  },
+}));

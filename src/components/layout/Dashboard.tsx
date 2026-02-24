@@ -7,6 +7,7 @@ import PomodoroWidget from '@/components/widgets/pomodoro/PomodoroWidget';
 import TaskListWidget from '@/components/widgets/tasks/TaskListWidget';
 import HabitTrackerWidget from '@/components/widgets/habits/HabitTrackerWidget';
 import RoutineWidget from '@/components/widgets/routines/RoutineWidget';
+import VisionWidget from '@/components/widgets/vision/VisionWidget';
 import StatsWidget from '@/components/widgets/stats/StatsWidget';
 import BurnInPrevention from '@/components/effects/BurnInPrevention';
 import ScreenDimmer from '@/components/effects/ScreenDimmer';
@@ -47,6 +48,7 @@ export default function Dashboard() {
       <ScreenDimmer />
       <div className="ambient-glow" />
       <div className="scan-line" />
+      <div className="scan-line-2" />
       {isSettingsOpen && <SettingsPanel />}
       <BurnInPrevention>
         <div className="h-screen w-screen p-2 overflow-hidden relative z-[1]">
@@ -63,15 +65,15 @@ export default function Dashboard() {
             |  Daily Objectives   |  Pomodoro Timer  |  Clock + Progress |
             |  (row-span-2)       |  (row-span-2)    |                   |
             |                     |                  +-------------------+
-            |                     |                  |  Routine Matin    |
+            |                     |                  |  Routines (fused) |
             +---------------------+------------------+-------------------+
             |  Task List          |  Stats & Analytics                   |
             |  (row-span-2)       |  (col-span-2)                       |
             |                     +------------------+-------------------+
-            |                     |  Habit Tracker   |  Routine Soir     |
+            |                     |  Habit Tracker   |  Vision / Goals   |
             +---------------------+------------------+-------------------+
           */}
-          <div className="grid grid-cols-3 grid-rows-4 gap-2 h-full [&>div]:min-h-0 widget-stagger">
+          <div className="grid grid-cols-3 grid-rows-4 gap-2 h-full [&>div]:min-h-0 widget-stagger grid-glow-lines">
             {/* Row 1-2, Col 1: Daily Objectives */}
             <div className="row-span-2 h-full">
               <DailyObjectivesWidget />
@@ -87,9 +89,9 @@ export default function Dashboard() {
               <ClockWidget />
             </div>
 
-            {/* Row 2, Col 3: Morning Routine */}
+            {/* Row 2, Col 3: Routines (matin + soir fusionnes) */}
             <div className="h-full">
-              <RoutineWidget type="morning" />
+              <RoutineWidget />
             </div>
 
             {/* Row 3-4, Col 1: Task List */}
@@ -107,9 +109,9 @@ export default function Dashboard() {
               <HabitTrackerWidget />
             </div>
 
-            {/* Row 4, Col 3: Bedtime Routine */}
+            {/* Row 4, Col 3: Vision / Long-term Goals */}
             <div className="h-full">
-              <RoutineWidget type="bedtime" />
+              <VisionWidget />
             </div>
           </div>
         </div>

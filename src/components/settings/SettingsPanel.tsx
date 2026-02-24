@@ -122,6 +122,60 @@ export default function SettingsPanel() {
             </div>
           </section>
 
+          {/* Data Export/Import */}
+          <section>
+            <h3 className="font-display text-[10px] uppercase tracking-[0.2em] text-cyber-green mb-3 flex items-center gap-2">
+              <span className="text-xs">💾</span> Donnees
+            </h3>
+            <div className="flex items-center gap-3">
+              <NeonButton variant="green" size="sm" onClick={() => {
+                const stores = ['objective-store', 'habit-store', 'task-store', 'pomodoro-store', 'daily-score-store', 'settings-store', 'routine-tracker-store'];
+                const data: Record<string, unknown> = {};
+                for (const key of stores) {
+                  const raw = localStorage.getItem(key);
+                  if (raw) {
+                    try { data[key] = JSON.parse(raw); } catch { data[key] = raw; }
+                  }
+                }
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `lcc-backup-${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+              }}>
+                Exporter mes donnees
+              </NeonButton>
+              <NeonButton variant="blue" size="sm" onClick={() => {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.json';
+                input.onchange = (e) => {
+                  const file = (e.target as HTMLInputElement).files?.[0];
+                  if (!file) return;
+                  const reader = new FileReader();
+                  reader.onload = (ev) => {
+                    try {
+                      const data = JSON.parse(ev.target?.result as string);
+                      for (const [key, value] of Object.entries(data)) {
+                        localStorage.setItem(key, typeof value === 'string' ? value : JSON.stringify(value));
+                      }
+                      alert('Import reussi ! Rechargement...');
+                      window.location.reload();
+                    } catch {
+                      alert('Fichier invalide.');
+                    }
+                  };
+                  reader.readAsText(file);
+                };
+                input.click();
+              }}>
+                Importer
+              </NeonButton>
+            </div>
+          </section>
+
           {/* Actions */}
           <div className="flex items-center gap-3 pt-2">
             <NeonButton variant="green" size="sm" onClick={handleSave}>

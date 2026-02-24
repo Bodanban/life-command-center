@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lcc-v1';
+const CACHE_NAME = 'lcc-v2';
 const BASE = '/life-command-center';
 
 const PRECACHE_URLS = [
@@ -24,14 +24,33 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch: network-first, fallback to cache, then offline page
+// Fetch: cache-first for static assets, network-first for pages
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
+  const url = new URL(event.request.url);
+
+  // Cache-first for Next.js static bundles (JS, CSS, images)
+  if (url.pathname.startsWith(BASE + '/_next/static/')) {
+    event.respondWith(
+      caches.match(event.request).then((cached) => {
+        if (cached) return cached;
+        return fetch(event.request).then((response) => {
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          }
+          return response;
+        });
+      })
+    );
+    return;
+  }
+
+  // Network-first for everything else, fallback to cache then offline page
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        // Cache successful responses
         if (response.ok) {
           const clone = response.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));

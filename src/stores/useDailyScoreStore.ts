@@ -30,22 +30,26 @@ function dateString(date: Date): string {
 }
 
 // Score global pondéré :
-// - Habitudes : 40% (c'est le plus important, tes non-négociables)
-// - Objectifs : 30% (les buts du jour)
-// - Tâches : 20% (les actions concrètes)
+// - Routines (matin+hebdo+soir) : 30%
+// - Habitudes : 25%
+// - Objectifs manuels : 20%
+// - Tâches : 15%
 // - Pomodoro : 10% (bonus productivité, plafonné à 100 pour 8 sessions)
 export function calculateGlobalScore(
   habitScore: number,
   objectiveScore: number,
   taskScore: number,
-  pomodoroSessions: number
+  pomodoroSessions: number,
+  routineRate?: number
 ): number {
   const pomodoroScore = Math.min(100, (pomodoroSessions / 8) * 100);
+  const rr = routineRate ?? 0;
   return Math.round(
-    habitScore * 0.4 +
-    objectiveScore * 0.3 +
-    taskScore * 0.2 +
-    pomodoroScore * 0.1
+    rr * 0.30 +
+    habitScore * 0.25 +
+    objectiveScore * 0.20 +
+    taskScore * 0.15 +
+    pomodoroScore * 0.10
   );
 }
 
