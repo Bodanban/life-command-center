@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { cn } from '@/lib/utils/cn';
 
 type AccentColor = 'blue' | 'green' | 'purple' | 'red' | 'yellow';
@@ -82,8 +83,8 @@ export default function WidgetPanel({
         </div>
       </div>
 
-      {/* Expanded fullscreen overlay */}
-      {expanded && (
+      {/* Expanded fullscreen overlay — portaled to body to escape transform/filter ancestors */}
+      {expanded && createPortal(
         <div
           className="fixed inset-0 z-[9998] flex items-center justify-center p-4 animate-expand-backdrop"
           style={{ background: 'rgba(5, 5, 10, 0.85)', backdropFilter: 'blur(8px)' }}
@@ -117,7 +118,8 @@ export default function WidgetPanel({
               {typeof children === 'function' ? children(true) : children}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
